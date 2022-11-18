@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 test_data
 test_script.sh
+*.sif

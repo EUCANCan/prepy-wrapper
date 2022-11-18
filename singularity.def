@@ -1,0 +1,112 @@
+Bootstrap: docker
+From: ubuntu:18.04
+Stage: spython-base
+
+%files
+. /opt/prepy-wrapper
+%labels
+author="Rodrigo Martin <rodrigo.martin@bsc.es>"
+%post
+
+DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+apt-get update && \
+apt-get install -y \
+autoconf \
+build-essential \
+bzip2 \
+cmake \
+cython \
+git \
+libbz2-dev \
+libncurses5-dev \
+openjdk-8-jdk \
+pkg-config \
+python \
+python2.7 \
+python2.7-dev \
+python-setuptools \
+python-pip \
+python-psutil \
+python-numpy \
+python-pandas \
+python-distribute \
+python-pysam \
+python-scipy \
+software-properties-common \
+libz-dev \
+libglib2.0-dev \
+libbz2-dev \
+liblzma-dev \
+default-jre \
+autoconf \
+wget \
+python3 \
+python3-pip \
+git \
+zlib1g-dev && \
+apt-get clean -y
+
+# Copy the source code
+mkdir -p /opt/prepy-wrapper
+
+# Install dependencies
+pip3 install -r /opt/prepy-wrapper/requirements.txt
+
+# Install hap.py
+git clone --recurse-submodules https://github.com/Illumina/hap.py
+mkdir -p /hap.py
+cd /hap.py
+
+pip install bx-python
+
+# copy git repository into the image
+mkdir -p /opt/hap.py-source
+cp -r /hap.py/* /opt/hap.py-source/
+
+# make minimal HG19 reference sequence
+mkdir -p /opt/hap.py-data
+
+# download HG19 reference data
+mkdir -p /opt/hap.py-data
+cd /opt/hap.py-data
+
+# get + install ant
+mkdir -p /opt
+cd /opt
+wget http://archive.apache.org/dist/ant/binaries/apache-ant-1.9.7-bin.tar.gz && \
+tar xzf apache-ant-1.9.7-bin.tar.gz && \
+rm apache-ant-1.9.7-bin.tar.gz
+PATH=$PATH:/opt/apache-ant-1.9.7/bin
+
+# run hap.py installer in the image, don't run tests since we don't have a reference file
+mkdir -p /opt/hap.py-source
+cd /opt/hap.py-source
+python install.py /opt/hap.py --with-rtgtools --no-tests
+mkdir -p /opt/hap.py
+cd /opt/hap.py
+
+# run basic tests
+bin/test_haplotypes
+
+# remove source folder
+mkdir -p /
+cd /
+rm -rf /opt/hap.py-source
+
+# Add pre.py to path
+PATH=$PATH:/opt/hap.py/bin
+# Add prepy-wrapper to path
+PATH=$PATH:/opt/prepy-wrapper/src
+%environment
+export PATH=$PATH:/opt/apache-ant-1.9.7/bin
+export PATH=$PATH:/opt/hap.py/bin
+export PATH=$PATH:/opt/prepy-wrapper/src
+%runscript
+cd /
+exec /bin/bash "$@"
+%startscript
+cd /
+exec /bin/bash "$@"
