@@ -61,4 +61,4 @@ singularity exec -c --workdir $PWD/workdir --bind $PWD -H $PWD prepy-wrapper.sif
 
 ## Output
 
-The output of the wrapper is a normalized VCF file for each input VCF file. The output files are located in `<output_prefix><input_file_basename>.vcf.gz`. If there are variants that could not be normalized (SVs or CNVs), they are located in `<output_prefix><input_file_basename>.skipped.vcf`.
+The output of the wrapper is a normalized VCF file for each input VCF file. The output files are located in `<output_prefix><input_file_basename>.normalized.vcf.gz`. If there are variants that could not be normalized (SVs or CNVs), they are located in `<output_prefix><input_file_basename>.skipped.vcf`.
