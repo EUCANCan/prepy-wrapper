@@ -102,8 +102,8 @@ if __name__ == '__main__':
         args.fasta_ref = os.path.abspath(args.fasta_ref)
         args.output_prefix = os.path.abspath(args.output_prefix)
         output_vcf = args.output_prefix + os.path.basename(input_vcf).replace('.vcf', '').replace('.gz', '').replace('.bcf', '') + '.normalized.vcf.gz'
-        # Avoid overwriting output VCF
-        if os.path.exists(output_vcf):
+        # Avoid overwriting non-empty output VCF
+        if os.path.exists(output_vcf) and os.path.getsize(output_vcf) > 0:
             print('Output VCF file already exists: ' + output_vcf)
             continue
         # Normalize VCF
