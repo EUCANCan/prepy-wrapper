@@ -23,12 +23,10 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
         input_vcf_f = pysam.VariantFile(in_f)
     # Iterate over variants
     for record in input_vcf_f:
-        if not keep_all and 'PASS' not in record.filter:
-            continue
         # Skip non-SNVs or indels (alt contains ], [, <, > or .)
         if any(re.search(NON_SNV_INDELS_REGEX, alt) for alt in record.alts):
             skipped_variants.append(record)
-        else:
+        elif keep_all or 'PASS' in record.filter:
             variants.append(record)
     # Create header
     header = input_vcf_f.header
