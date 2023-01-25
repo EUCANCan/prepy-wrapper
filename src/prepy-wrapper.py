@@ -24,7 +24,7 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
     # Iterate over variants
     for record in input_vcf_f:
         # Skip non-SNVs or indels (alt contains ], [, <, > or .)
-        if any(re.search(NON_SNV_INDELS_REGEX, alt) for alt in record.alts):
+        if not record.alts or any(re.search(NON_SNV_INDELS_REGEX, alt) for alt in record.alts):
             skipped_variants.append(record)
         elif keep_all or 'PASS' in record.filter:
             variants.append(record)
@@ -90,6 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--fasta_ref', required=True, help='Reference FASTA file')
     parser.add_argument('-o', '--output_prefix', required=True, help='Output prefix')
     parser.add_argument('--keep_all', action='store_true', help='Keep all variants (including non-PASS)')
+    parser.add_argument('--force', action='store_true', help='Force overwrite of output files')
 
     args = parser.parse_args()
 
@@ -101,7 +102,7 @@ if __name__ == '__main__':
         args.output_prefix = os.path.abspath(args.output_prefix)
         output_vcf = args.output_prefix + os.path.basename(input_vcf).replace('.vcf', '').replace('.gz', '').replace('.bcf', '') + '.normalized.vcf.gz'
         # Avoid overwriting non-empty output VCF
-        if os.path.exists(output_vcf) and os.path.getsize(output_vcf) > 0:
+        if not args.force and os.path.exists(output_vcf) and os.path.getsize(output_vcf) > 0:
             print('Output VCF file already exists: ' + output_vcf)
             continue
         # Normalize VCF
