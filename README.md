@@ -8,6 +8,7 @@ It requires Python 3 and the [Pysam package](https://github.com/pysam-developers
 - [Getting started](#getting-started)
 - [Usage](#usage)
 - [Output](#output)
+- [Dependencies](#dependencies)
   
 ## Getting started
 
@@ -62,3 +63,13 @@ singularity exec -c --workdir $PWD/workdir --bind $PWD -H $PWD prepy-wrapper.sif
 ## Output
 
 The output of the wrapper is a normalized VCF file for each input VCF file. The output files are located in `<output_prefix><input_file_basename>.normalized.vcf.gz`. If there are variants that could not be normalized (SVs or CNVs), they are located in `<output_prefix><input_file_basename>.skipped.vcf`.
+
+## Dependencies
+
+The dependencies are covered by their own respective licenses as follows:
+
+* [Python/Pysam package](https://github.com/pysam-developers/pysam) (MIT license)
+
+Further dependencies (to be installed by the user of this software):
+
+*   [Hap.py](https://github.com/Illumina/hap.py) (Copyright (c) 2010-2015 Illumina, Inc.)

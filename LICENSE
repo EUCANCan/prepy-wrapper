@@ -19,13 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
--------------------------------------------------------------------------------
-
-The dependencies are covered by their own respective licenses as follows:
-
-*   Python/Pysam 0.20.0 (MIT license - https://github.com/pysam-developers/pysam)
-
-Further dependencies (to be installed by the user of this software):
-
-*   Hap.py (Copyright (c) 2010-2015 Illumina, Inc. - https://github.com/Illumina/hap.py)
