@@ -8,6 +8,39 @@ import pysam
 NON_SNV_INDELS_REGEX = r'[\[\]<>.]'
 
 
+def _add_chr_to_alt_field(alt_field):
+    # Check if alt_field uses brackets
+    if ':' not in alt_field:
+        return alt_field
+    # Check if alt_field is a single alt or multiple alts
+    if ',' in alt_field:
+        return ','.join(_add_chr_to_alt_field(alt) for alt in alt_field.split(','))
+    start, end = alt_field.split(':')
+    bracket = '[' if '[' in start else ']'
+    if bracket == '[':
+        prefix, chrom = start.split('[')
+    else:  # Assume ]
+        prefix, chrom = start.split(']')
+    chr_chrom = 'chr' + chrom
+    return prefix + bracket + chr_chrom + ':' + end
+
+
+def _fix_contigs(variant_record_tab_sep_str, contigs):
+    var_contig = variant_record_tab_sep_str[0]
+    alt_field = variant_record_tab_sep_str[4]
+    if var_contig not in contigs:
+        # Try to find contig without chr prefix
+        if var_contig.startswith('chr'):
+            var_contig = var_contig.replace('chr', '')
+            alt_field = alt_field.replace('chr', '')
+        else:
+            var_contig = 'chr' + var_contig
+            alt_field = _add_chr_to_alt_field(alt_field)
+        if var_contig not in contigs:
+            raise ValueError('Contig ' + var_contig + ' not found in reference file')
+    return [var_contig] + variant_record_tab_sep_str[1:4] + [alt_field] + variant_record_tab_sep_str[5:]
+
+
 def _normalize_vcf(input_vcf, output_vcf, fasta_ref):
     # Call pre.py
     pre_py_command = os.environ.get('PRE_PY_COMMAND', 'pre.py')
@@ -30,7 +63,6 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
             variants.append(record)
     # Create header
     header = input_vcf_f.header
-    base_header_str = str(header)
     # Add samples if not present
     if len(header.samples) == 0:
         header.add_sample('NORMAL_DUMMY')
@@ -39,26 +71,28 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
     if 'GT' not in header.formats:
         header.formats.add('GT', '1', 'String', 'Genotype')
     # Add all contigs from the reference file
-    added_contigs = set()
+    contigs = set()
     with open(fasta_ref + '.fai') as f:
         for line in f:
             chrom, length = line.split()[:2]
-            added_contigs.add(chrom)
+            contigs.add(chrom)
             if chrom in header.contigs:
                 continue
             header.contigs.add(chrom, length=int(length))
+    # Remove all contigs from the header that are not present in the reference file
     for contig in header.contigs:
-        if contig not in added_contigs:
+        if contig not in contigs:
             header.contigs.remove_header(contig)
     # Iterate over all variants INFO fields and add missing ones
     for variant_record in variants:
         for field in variant_record.info:
             if field not in header.info:
                 header.info.add(field, 1, 'String', '')
+    header_str = str(header)
     if len(variants) > 0:
         out_f = open(clean_vcf_file, 'w')
         # Write header
-        out_f.write(str(header))
+        out_f.write(header_str)
         # Check tumor-normal order
         tumor_normal_order = 1
         # Check with the first variant
@@ -66,8 +100,8 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
             tumor_normal_order = -1
         # Write variants
         for variant_record in variants:
+            tab_sep_str = _fix_contigs(str(variant_record).strip().split('\t'), contigs)
             # Fix for pre.py: Remove all format fields except GT
-            tab_sep_str = str(variant_record).strip().split('\t')
             record_str = '\t'.join(tab_sep_str[:8] + ['GT'] + ['0/0', '0/1'][::tumor_normal_order])
             out_f.write(record_str + '\n')
             # out_f.write(str(variant_record))
@@ -78,9 +112,10 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
             os.path.basename(input_vcf).replace('.vcf', '').replace('.gz', '').replace('.bcf', '') + '.skipped.vcf'
         skipped_f = open(skipped_vcf_file, 'w')
         # Write header
-        skipped_f.write(base_header_str)
+        skipped_f.write(header_str)
         for skipped_variant in skipped_variants:
-            skipped_f.write(str(skipped_variant))
+            tab_sep_str = _fix_contigs(str(skipped_variant).strip().split('\t'), contigs)
+            skipped_f.write('\t'.join(tab_sep_str) + '\n')
         skipped_f.close()
     return clean_vcf_file if len(variants) > 0 else None
 
