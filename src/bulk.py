@@ -10,7 +10,7 @@ def normalize_vcf(input_vcf, output_prefix, fasta_ref):
     # Call pre.py wrapper
     # Get pre.py wrapper path, next to this script
     prepy_wrapper_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'prepy-wrapper.py')
-    pre_args = ['python3', prepy_wrapper_file, '-i', input_vcf, '-o', output_prefix, '-f', fasta_ref, '--force']
+    pre_args = ['python3', prepy_wrapper_file, '-i', input_vcf, '-o', output_prefix, '-f', fasta_ref]
     subprocess.check_call(pre_args)
 
 
