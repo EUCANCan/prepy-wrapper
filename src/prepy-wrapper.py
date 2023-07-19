@@ -40,7 +40,7 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
         header.formats.add('GT', '1', 'String', 'Genotype')
     # Add all contigs from the reference file
     added_contigs = set()
-    with open(fasta_ref+'.fai') as f:
+    with open(fasta_ref + '.fai') as f:
         for line in f:
             chrom, length = line.split()[:2]
             added_contigs.add(chrom)
@@ -74,7 +74,8 @@ def _clean_vcf(output_prefix, fasta_ref, input_vcf, keep_all=False):
         out_f.close()
 
     if len(skipped_variants) > 0:
-        skipped_vcf_file = output_prefix + os.path.basename(input_vcf).replace('.vcf', '').replace('.gz', '').replace('.bcf', '') + '.skipped.vcf'
+        skipped_vcf_file = output_prefix + \
+            os.path.basename(input_vcf).replace('.vcf', '').replace('.gz', '').replace('.bcf', '') + '.skipped.vcf'
         skipped_f = open(skipped_vcf_file, 'w')
         # Write header
         skipped_f.write(base_header_str)
@@ -99,8 +100,8 @@ if __name__ == '__main__':
         # Convert all paths to absolute paths
         input_vcf = os.path.abspath(input_vcf)
         args.fasta_ref = os.path.abspath(args.fasta_ref)
-        args.output_prefix = os.path.abspath(args.output_prefix)
-        output_vcf = args.output_prefix + os.path.basename(input_vcf).replace('.vcf', '').replace('.gz', '').replace('.bcf', '') + '.normalized.vcf.gz'
+        output_vcf = args.output_prefix + \
+            os.path.basename(input_vcf).replace('.vcf', '').replace('.gz', '').replace('.bcf', '') + '.normalized.vcf.gz'
         # Avoid overwriting non-empty output VCF
         if not args.force and os.path.exists(output_vcf) and os.path.getsize(output_vcf) > 0:
             print('Output VCF file already exists: ' + output_vcf)

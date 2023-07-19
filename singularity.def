@@ -3,7 +3,8 @@ From: ubuntu:18.04
 Stage: spython-base
 
 %files
-. /opt/prepy-wrapper
+./src /opt/prepy-wrapper/src
+./requirements.txt /opt/prepy-wrapper/requirements.txt
 %labels
 author="Rodrigo Martin <rodrigo.martin@bsc.es>"
 %post
@@ -50,7 +51,10 @@ zlib1g-dev && \
 apt-get clean -y
 
 # Copy the source code
-mkdir -p /opt/prepy-wrapper
+mkdir -p /opt/prepy-wrapper/src
+# Change the permissions to be able to execute the scripts in src folder
+chmod -R 755 /opt/prepy-wrapper/src
+PATH=$PATH:/opt/prepy-wrapper/src
 
 # Install dependencies
 pip3 install -r /opt/prepy-wrapper/requirements.txt
@@ -98,12 +102,10 @@ rm -rf /opt/hap.py-source
 
 # Add pre.py to path
 PATH=$PATH:/opt/hap.py/bin
-# Add prepy-wrapper to path
-PATH=$PATH:/opt/prepy-wrapper/src
 %environment
+export PATH=$PATH:/opt/prepy-wrapper/src
 export PATH=$PATH:/opt/apache-ant-1.9.7/bin
 export PATH=$PATH:/opt/hap.py/bin
-export PATH=$PATH:/opt/prepy-wrapper/src
 %runscript
 cd /
 exec /bin/bash "$@"

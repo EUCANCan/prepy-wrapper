@@ -43,8 +43,12 @@ RUN apt-get update && \
     apt-get clean -y
 
 # Copy the source code
-RUN mkdir -p /opt/prepy-wrapper
-COPY . /opt/prepy-wrapper
+RUN mkdir -p /opt/prepy-wrapper/src
+COPY ./src /opt/prepy-wrapper/src
+# Change the permissions to be able to execute the scripts in src folder
+RUN chmod -R 755 /opt/prepy-wrapper/src
+COPY ./requirements.txt /opt/prepy-wrapper/requirements.txt
+ENV PATH $PATH:/opt/prepy-wrapper/src
 
 # Install dependencies
 RUN pip3 install -r /opt/prepy-wrapper/requirements.txt
