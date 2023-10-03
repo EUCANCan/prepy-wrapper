@@ -133,3 +133,4 @@ example/example_bulk
 example/example_standard
 example/genome.fa*
 example/workdir-*
+logs/

@@ -6,6 +6,8 @@ It requires Python 3 and the [Pysam package](https://github.com/pysam-developers
 
 ## Table of contents<!-- omit in toc -->
 - [Getting started](#getting-started)
+  - [Singularity](#singularity)
+  - [Docker](#docker)
 - [Usage](#usage)
   - [Bulk wrapper](#bulk-wrapper)
   - [Wrapper](#wrapper)
@@ -14,17 +16,25 @@ It requires Python 3 and the [Pysam package](https://github.com/pysam-developers
   
 ## Getting started
 
-You can build the Docker image with the following command:
+### Singularity
+We recommend using [`singularity-ce`](https://github.com/sylabs/singularity) with a version higher than 3.9.0. You can download the Singularity container using the following command (does not require root privileges):
+
+```
+singularity pull prepy-wrapper.sif oras://
+```
+
+If you want to build the container yourself, you can use the [`singularity.def`](singularity.def) file. However it requires root privileges to build the container.
+```
+sudo singularity build --force prepy-wrapper.sif singularity.def
+```
+
+### Docker
+You can build the Docker container with the following command (requires root privileges):
 
 ```bash
 docker build -t prepy-wrapper .
 ```
 
-Or you can build the Singularity image (we recommend using [`singularity-ce`](https://github.com/sylabs/singularity) with a version higher than 3.9.0) with the following command:
-
-```bash
-sudo singularity build --force prepy-wrapper.sif singularity.def
-```
 
 ## Usage
 
